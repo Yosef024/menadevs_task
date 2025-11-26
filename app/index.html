@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library AI Agent</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: #2d2d2d;
+            border-right: 1px solid #404040;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .new-chat-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .new-chat-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .sessions-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .session-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #3a3a3a;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .session-item:hover {
+            background: #4a4a4a;
+        }
+
+        .session-item.active {
+            border-color: #667eea;
+            background: #4a4a4a;
+        }
+
+        .session-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .session-preview {
+            font-size: 0.8rem;
+            color: #ccc;
+            opacity: 0.8;
+        }
+
+        /* Main Chat */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #404040;
+            background: #2d2d2d;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .user .message-avatar {
+            background: #667eea;
+        }
+
+        .assistant .message-avatar {
+            background: #10b981;
+        }
+
+        .message-content {
+            background: #3a3a3a;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #404040;
+        }
+
+        .user .message-content {
+            background: #667eea;
+            border-color: #5a6fd8;
+        }
+
+        .message-text {
+            line-height: 1.4;
+        }
+
+        /* Tool Call Styles */
+        .tool-call {
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .tool-name {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .tool-output {
+            margin-top: 4px;
+            font-size: 0.85rem;
+            color: #ccc;
+            white-space: pre-wrap;
+        }
+
+        .tool-success {
+            border-left-color: #10b981;
+        }
+
+        .tool-error {
+            border-left-color: #ef4444;
+        }
+
+        .input-container {
+            padding: 15px 20px;
+            border-top: 1px solid #404040;
+            background: #2d2d2d;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #3a3a3a;
+            border: 1px solid #404040;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #667eea;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background: #5a6fd8;
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading and States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 1.1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #ccc;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ccc;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .error {
+            background: #ef4444;
+            color: white;
+            padding: 10px 15px;
+            margin: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .status-bar {
+            padding: 8px 15px;
+            background: #2d2d2d;
+            border-top: 1px solid #404040;
+            font-size: 0.8rem;
+            color: #ccc;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-healthy {
+            background: #10b981;
+        }
+
+        .status-degraded {
+            background: #f59e0b;
+        }
+
+        .status-error {
+            background: #ef4444;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function App() {
+            const [sessions, setSessions] = useState([]);
+            const [currentSession, setCurrentSession] = useState(null);
+            const [messages, setMessages] = useState([]);
+            const [inputMessage, setInputMessage] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [isInitializing, setIsInitializing] = useState(true);
+            const [agentStatus, setAgentStatus] = useState('loading');
+            const [showToolCalls, setShowToolCalls] = useState(true);
+            const messagesEndRef = useRef(null);
+
+            const API_BASE = 'http://localhost:8000';
+
+            // Scroll to bottom
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages]);
+
+            // Load sessions and agent status on startup
+            useEffect(() => {
+                loadSessions();
+                checkAgentStatus();
+            }, []);
+
+            const checkAgentStatus = async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/health`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setAgentStatus(data.status);
+                    }
+                } catch (err) {
+                    setAgentStatus('error');
+                }
+            };
+
+            const loadSessions = async () => {
+                try {
+                    console.log('Loading sessions from:', `${API_BASE}/sessions`);
+                    const response = await fetch(`${API_BASE}/sessions`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    console.log('Sessions data:', data);
+                    
+                    if (data.success) {
+                        setSessions(data.data);
+                        if (data.data.length > 0 && !currentSession) {
+                            setCurrentSession(data.data[0]);
+                            loadMessages(data.data[0].id);
+                        }
+                        setError(null);
+                    }
+                } catch (err) {
+                    console.error('Error loading sessions:', err);
+                    setError('Cannot connect to server: ' + err.message);
+                } finally {
+                    setIsInitializing(false);
+                }
+            };
+
+            const loadMessages = async (sessionId) => {
+                try {
+                    const response = await fetch(`${API_BASE}/sessions/${sessionId}/messages`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (data.success) {
+                        // Load tool calls for each assistant message
+                        const messagesWithToolCalls = await Promise.all(
+                            data.data.map(async (message) => {
+                                if (message.role === 'assistant') {
+                                    try {
+                                        const toolCallsResponse = await fetch(`${API_BASE}/sessions/${sessionId}/tool-calls`);
+                                        if (toolCallsResponse.ok) {
+                                            const toolData = await toolCallsResponse.json();
+                                            if (toolData.success) {
+                                                return {
+                                                    ...message,
+                                                    tool_calls: toolData.data.filter(tc => 
+                                                        tc.session_id === sessionId
+                                                    )
+                                                };
+                                            }
+                                        }
+                                    } catch (err) {
+                                        console.error('Error loading tool calls:', err);
+                                    }
+                                }
+                                return message;
+                            })
+                        );
+                        setMessages(messagesWithToolCalls);
+                    }
+                } catch (err) {
+                    console.error('Error loading messages:', err);
+                    setError('Failed to load messages: ' + err.message);
+                }
+            };
+
+            const createNewSession = async () => {
+                try {
+                    setIsLoading(true);
+                    console.log('Creating new session...');
+                    
+                    const response = await fetch(`${API_BASE}/sessions`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ title: 'New Chat' })
+                    });
+                    
+                    console.log('Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    handleSessionCreation(data);
+                    
+                } catch (err) {
+                    console.error('Error creating session:', err);
+                    setError('Failed to create session: ' + err.message);
+                    
+                    // Last resort: create session locally
+                    const fallbackSession = {
+                        id: 'local-' + Date.now(),
+                        title: 'New Chat',
+                        created_at: new Date().toISOString()
+                    };
+                    setSessions(prev => [fallbackSession, ...prev]);
+                    setCurrentSession(fallbackSession);
+                    setMessages([]);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const handleSessionCreation = (data) => {
+                if (data.success) {
+                    const newSession = {
+                        id: data.data.session_id,
+                        title: 'New Chat',
+                        created_at: new Date().toISOString()
+                    };
+                    setSessions(prev => [newSession, ...prev]);
+                    setCurrentSession(newSession);
+                    setMessages([]);
+                    setError(null);
+                } else {
+                    throw new Error(data.message || 'Failed to create session');
+                }
+            };
+
+            const handleSessionSelect = async (session) => {
+                setCurrentSession(session);
+                await loadMessages(session.id);
+                setError(null);
+            };
+
+            const sendMessage = async (e) => {
+                e.preventDefault();
+                if (!inputMessage.trim() || !currentSession || isLoading) return;
+
+                const userMessage = inputMessage.trim();
+                setInputMessage('');
+                setIsLoading(true);
+                setError(null);
+
+                // Add user message immediately
+                const newUserMessage = {
+                    id: Date.now(),
+                    role: 'user',
+                    content: userMessage,
+                    timestamp: new Date().toISOString()
+                };
+                setMessages(prev => [...prev, newUserMessage]);
+
+                try {
+                    const response = await fetch(`${API_BASE}/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            session_id: currentSession.id,
+                            message: userMessage
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+
+                    // Add assistant response with tool calls
+                    const assistantMessage = {
+                        id: Date.now() + 1,
+                        role: 'assistant',
+                        content: data.message,
+                        timestamp: new Date().toISOString(),
+                        tool_calls: data.tool_calls || []
+                    };
+                    setMessages(prev => [...prev, assistantMessage]);
+
+                    // Reload sessions to update titles
+                    await loadSessions();
+                    await checkAgentStatus();
+                } catch (err) {
+                    console.error('Error sending message:', err);
+                    setError('Failed to send message: ' + err.message);
+                    const errorMessage = {
+                        id: Date.now() + 1,
+                        role: 'assistant',
+                        content: 'Sorry, I encountered an error. Please try again.',
+                        timestamp: new Date().toISOString(),
+                        tool_calls: []
+                    };
+                    setMessages(prev => [...prev, errorMessage]);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const renderToolCalls = (toolCalls) => {
+                if (!showToolCalls || !toolCalls || toolCalls.length === 0) return null;
+
+                return (
+                    <div className="tool-calls">
+                        {toolCalls.map((toolCall, index) => (
+                            <div 
+                                key={index} 
+                                className={`tool-call ${toolCall.success ? 'tool-success' : 'tool-error'}`}
+                            >
+                                <div className="tool-name">
+                                    🛠️ {toolCall.tool_name} {toolCall.success ? '✓' : '✗'}
+                                </div>
+                                <div className="tool-output">
+                                    {toolCall.output}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+            const getStatusIndicator = () => {
+                switch (agentStatus) {
+                    case 'healthy': return 'status-healthy';
+                    case 'degraded': return 'status-degraded';
+                    case 'error': return 'status-error';
+                    default: return 'status-degraded';
+                }
+            };
+
+            if (isInitializing && sessions.length === 0) {
+                return (
+                    <div className="loading">
+                        <div>Loading Library Agent...</div>
+                        {error && <div className="error" style={{marginTop: '10px'}}>{error}</div>}
+                    </div>
+                );
+            }
+
+            return (
+                <div className="app-container">
+                    {/* Sidebar */}
+                    <div className="sidebar">
+                        <div className="sidebar-header">
+                            <h2>📚 Library Agent</h2>
+                            <button 
+                                className="new-chat-btn"
+                                onClick={createNewSession}
+                                disabled={isLoading}
+                            >
+                                + New Chat
+                            </button>
+                        </div>
+
+                        <div className="sessions-list">
+                            {sessions.map(session => (
+                                <div
+                                    key={session.id}
+                                    className={`session-item ${currentSession?.id === session.id ? 'active' : ''}`}
+                                    onClick={() => handleSessionSelect(session)}
+                                >
+                                    <div className="session-title">
+                                        {session.title || 'New Chat'}
+                                    </div>
+                                    {session.last_message && (
+                                        <div className="session-preview">
+                                            {session.last_message.substring(0, 40)}...
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Main Chat */}
+                    <div className="main-content">
+                        {currentSession ? (
+                            <>
+                                <div className="chat-header">
+                                    <h3>{currentSession.title || 'New Chat'}</h3>
+                                </div>
+
+                                <div className="messages-container">
+                                    {messages.length === 0 ? (
+                                        <div className="empty-state">
+                                            <h3>Welcome to Library AI Agent</h3>
+                                            <p>Ask about books, orders, inventory, or search documents.</p>
+                                            <p style={{marginTop: '10px', fontSize: '0.9rem', opacity: 0.7}}>
+                                                Try: "What books do you have by George Orwell?" or 
+                                                "Show me the inventory summary"
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        messages.map(message => (
+                                            <div key={message.id} className={`message ${message.role}`}>
+                                                <div className="message-avatar">
+                                                    {message.role === 'user' ? '👤' : '🤖'}
+                                                </div>
+                                                <div className="message-content">
+                                                    <div className="message-text">{message.content}</div>
+                                                    {message.role === 'assistant' && renderToolCalls(message.tool_calls)}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                    {isLoading && (
+                                        <div className="message assistant">
+                                            <div className="message-avatar">🤖</div>
+                                            <div className="message-content">
+                                                <div className="typing-indicator">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div ref={messagesEndRef} />
+                                </div>
+
+                                {error && (
+                                    <div className="error">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <form className="input-container" onSubmit={sendMessage}>
+                                    <div className="input-wrapper">
+                                        <input
+                                            type="text"
+                                            value={inputMessage}
+                                            onChange={(e) => setInputMessage(e.target.value)}
+                                            placeholder="Type your message..."
+                                            disabled={isLoading}
+                                            className="message-input"
+                                        />
+                                        <button 
+                                            type="submit" 
+                                            disabled={!inputMessage.trim() || isLoading}
+                                            className="send-button"
+                                        >
+                                            {isLoading ? '⏳' : '📤'}
+                                        </button>
+                                    </div>
+                                </form>
+
+                                {/* Status Bar */}
+                                <div className="status-bar">
+                                    <div className="agent-status">
+                                        <div className={`status-indicator ${getStatusIndicator()}`}></div>
+                                        Agent: {agentStatus}
+                                    </div>
+                                    <div>
+                                        <button 
+                                            style={{
+                                                background: 'none',
+                                                border: '1px solid #404040',
+                                                color: '#ccc',
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                fontSize: '0.7rem',
+                                                cursor: 'pointer'
+                                            }}
+                                            onClick={() => setShowToolCalls(!showToolCalls)}
+                                        >
+                                            {showToolCalls ? '🔧 Hide Tools' : '🔧 Show Tools'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="empty-state">
+                                <h3>No Session Selected</h3>
+                                <p>Select a session or create a new one to start chatting.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
