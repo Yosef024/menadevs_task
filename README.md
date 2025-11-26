@@ -22,8 +22,8 @@ Library-AI-Agent/
 First, clone the repository from GitHub:
 
 ```bash
-git clone https://github.com/your-username/Library-AI-Agent.git
-cd Library-AI-Agent
+git clone https://github.com/Yosef024/menadevs_task.git
+cd menadevs_task
 ```
 ### Prerequisites
 - Python 3.8+
@@ -39,14 +39,118 @@ pip install -r requirements.txt
 ```
 **requirements.txt contents:**
 ```txt
-fastapi==0.104.1
-uvicorn==0.24.0
-sqlite3
-python-multipart==0.0.6
-pydantic==2.5.0
-google-generativeai==0.3.0
-langchain==0.0.350
-python-dotenv==1.0.0
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.2
+aiosignal==1.4.0
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anyio==4.11.0
+attrs==25.4.0
+cachetools==6.2.2
+certifi==2025.11.12
+cffi==2.0.0
+charset-normalizer==3.4.4
+click==8.3.1
+colorama==0.4.6
+cryptography==46.0.3
+dataclasses-json==0.6.7
+faiss-cpu==1.13.0
+fastapi==0.122.0
+filelock==3.20.0
+filetype==1.2.0
+frozenlist==1.8.0
+fsspec==2025.10.0
+google-ai-generativelanguage==0.9.0
+google-api-core==2.28.1
+google-api-python-client==2.187.0
+google-auth==2.43.0
+google-auth-httplib2==0.2.1
+google-genai==1.52.0
+google-generativeai==0.8.5
+googleapis-common-protos==1.72.0
+greenlet==3.2.4
+grpcio==1.76.0
+grpcio-status==1.71.2
+h11==0.16.0
+httpcore==1.0.9
+httplib2==0.31.0
+httpx==0.28.1
+httpx-sse==0.4.3
+huggingface-hub==0.36.0
+idna==3.11
+Jinja2==3.1.6
+joblib==1.5.2
+jsonpatch==1.33
+jsonpointer==3.0.0
+langchain==1.1.0
+langchain-classic==1.0.0
+langchain-community==0.4.1
+langchain-core==1.1.0
+langchain-google-genai==3.2.0
+langchain-text-splitters==1.0.0
+langgraph==1.0.3
+langgraph-checkpoint==3.0.1
+langgraph-prebuilt==1.0.5
+langgraph-sdk==0.2.10
+langsmith==0.4.47
+MarkupSafe==3.0.3
+marshmallow==3.26.1
+mpmath==1.3.0
+multidict==6.7.0
+mypy_extensions==1.1.0
+networkx==3.6
+numpy==2.3.5
+orjson==3.11.4
+ormsgpack==1.12.0
+packaging==25.0
+pdfminer.six==20251107
+pdfplumber==0.11.8
+pillow==12.0.0
+propcache==0.4.1
+proto-plus==1.26.1
+protobuf==5.29.5
+pyasn1==0.6.1
+pyasn1_modules==0.4.2
+pycparser==2.23
+pydantic==2.12.4
+pydantic-settings==2.12.0
+pydantic_core==2.41.5
+pyparsing==3.2.5
+PyPDF2==3.0.1
+pypdfium2==5.1.0
+python-dotenv==1.2.1
+python-multipart==0.0.20
+PyYAML==6.0.3
+regex==2025.11.3
+requests==2.32.5
+requests-toolbelt==1.0.0
+rsa==4.9.1
+safetensors==0.7.0
+scikit-learn==1.7.2
+scipy==1.16.3
+sentence-transformers==5.1.2
+setuptools==80.9.0
+sniffio==1.3.1
+SQLAlchemy==2.0.44
+starlette==0.50.0
+sympy==1.14.0
+tenacity==9.1.2
+threadpoolctl==3.6.0
+tokenizers==0.22.1
+torch==2.9.1
+tqdm==4.67.1
+transformers==4.57.2
+typing-inspect==0.9.0
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+uritemplate==4.2.0
+urllib3==2.5.0
+uvicorn==0.38.0
+websockets==15.0.1
+xxhash==3.6.0
+yarl==1.22.0
+zstandard==0.25.0
+
 ```
 ### 2. Environment Configuration
 Create a `.env` file in the project root:
