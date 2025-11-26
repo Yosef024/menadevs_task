@@ -165,17 +165,17 @@ Open **two separate terminals**:
 # Navigate to project directory
 cd library-ai-agent
 # Start the FastAPI server
-python -m server.main
+uvicorn server.main:app --reload --port 8000 --host 0.0.0.0
 ```
 **Terminal 2 - Frontend Access:**
 ```bash
 # Open the application in your browser
 # On macOS:
-open http://localhost:8000/app
+open http://localhost:3000/app
 # On Windows:
-start http://localhost:8000/app
+start http://localhost:3000/app
 # On Linux:
-xdg-open http://localhost:8000/app
+xdg-open http://localhost:3000/app
 ```
 ## 📁 Code Documentation
 ### 1. Frontend UI (`app/index.html`)
