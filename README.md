@@ -166,6 +166,9 @@ Open **two separate terminals**:
 cd library-ai-agent
 # Start the FastAPI server
 uvicorn server.main:app --reload --port 8000 --host 0.0.0.0
+# Start the user interface
+python -m http.server 3000
+important note: each command will be running on seperate terminal
 ```
 **Terminal 2 - Frontend Access:**
 ```bash
