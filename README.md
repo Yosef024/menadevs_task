@@ -186,7 +186,6 @@ xdg-open http://localhost:3000/app
 **Key Features:**
 - Real-time chat interface with message history
 - Session management (create new conversations)
-- Tool execution visualization
 - Responsive design for desktop and mobile
 **Components:**
 - Chat message bubbles (user & assistant)
